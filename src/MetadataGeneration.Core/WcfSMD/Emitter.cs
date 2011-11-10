@@ -83,7 +83,7 @@ namespace MetadataGeneration.Core.WcfSMD
                 var smdXmlComment = SmdXmlComment.CreateFromXml(methodSmdElement);
                 
                 //Don't document methods that are market
-                if (smdXmlComment.Excluded)
+                if (smdXmlComment.Exclude)
                     continue;
 
                 JObject service = null;

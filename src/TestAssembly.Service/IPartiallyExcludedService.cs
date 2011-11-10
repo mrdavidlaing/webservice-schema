@@ -27,7 +27,7 @@ namespace TestAssembly.Service
             /// This service should not be documented
             ///</summary>
             ///<returns></returns>
-            ///<smd excluded="true"/>
+            ///<smd exclude="true"/>
             [OperationContract]
             [WebGet(
                 UriTemplate = "/PartiallyExcludedService/excluded",

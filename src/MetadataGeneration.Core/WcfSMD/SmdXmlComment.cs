@@ -6,7 +6,7 @@ namespace MetadataGeneration.Core.WcfSMD
 {
     public class SmdXmlComment
     {
-        public bool Excluded { get; set; }
+        public bool Exclude { get; set; }
         public string MethodName { get; set; }
 
         public static SmdXmlComment CreateFromXml(XElement methodSmdElement)
@@ -14,7 +14,7 @@ namespace MetadataGeneration.Core.WcfSMD
             var smdXmlComment = new SmdXmlComment
                                     {
                                         MethodName = GetAttributeValue(methodSmdElement, "method", ""),
-                                        Excluded = bool.Parse(GetAttributeValue(methodSmdElement, "excluded", "false"))
+                                        Exclude = bool.Parse(GetAttributeValue(methodSmdElement, "exclude", "false"))
                                     };
 
             return smdXmlComment;
