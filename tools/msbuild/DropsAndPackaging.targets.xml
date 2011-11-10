@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Go" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <DropDirectory>$(RootDirectory)\dist</DropDirectory>
+    <DropLibDirectory>$(DropDirectory)\lib</DropLibDirectory>
+    <DropContentDirectory>$(DropDirectory)\content</DropContentDirectory>
+    <DropToolsDirectory>$(DropDirectory)\tools</DropToolsDirectory>
+    <DropReportsDirectory>$(DropDirectory)\reports</DropReportsDirectory>
+
+    <NuGetEXE>$(ProgramFiles86)\nuget\nuget.exe</NuGetEXE>
+  </PropertyGroup>
+
+  <Target Name="Package" DependsOnTargets="CreateDropDirectories;CopyMSBuildOutputToDropDirectory;CopyLicenseToAllDirectories;CopyReportsToDropFolder">
+    <Message Text="Packaging with NuGet" />
+    <Copy SourceFiles="$(RootDirectory)\src\Package.nuspec" DestinationFolder="$(DropDirectory)"/>
+    <Exec Command='"$(NuGetEXE)" pack $(DropDirectory)\Package.nuspec' ContinueOnError='false' WorkingDirectory='$(DropDirectory)'/>
+  </Target>
+
+  <Target Name="PublishToNugetOrg" DependsOnTargets="Package">
+     <Exec Command='"$(NuGetEXE)" push $(DropDirectory)\RESTful-Webservice-Schema.$(Major).$(Minor).$(Build).$(Revision).nupkg' ContinueOnError='false' WorkingDirectory='$(DropDirectory)'/>
+  </Target>
+  
+  <Target Name="CreateDropDirectories">
+    <Message Text="Making the drop directories at '$(DropDirectory)'." />
+    <RemoveDir Directories="$(DropDirectory)" Condition="Exists('$(DropDirectory)')"/>
+    <Message Text="Making the drop directories at '$(DropDirectory)'." />
+    <MakeDir Directories="$(DropDirectory)" Condition="!Exists('$(DropDirectory)')" />
+    <MakeDir Directories="$(DropLibDirectory)" Condition="!Exists('$(DropLibDirectory)')" />
+    <MakeDir Directories="$(DropContentDirectory)" Condition="!Exists('$(DropContentDirectory)')" />
+    <MakeDir Directories="$(DropToolsDirectory)" Condition="!Exists('$(DropToolsDirectory)')" />
+    <MakeDir Directories="$(DropReportsDirectory)" Condition="!Exists('$(DropReportsDirectory)')" />
+  </Target>
+  
+  <Target Name="CopyMSBuildOutputToDropDirectory">
+    <Message Text="Copying selected MSBuild output to $(DropLibDirectory)" />
+    <Copy ContinueOnError="false" SourceFiles="@(ForDropLibDirectory)" DestinationFolder="$(DropLibDirectory)" />
+    <Message Text="Copying selected MSBuild output to $(DropToolsDirectory)" />
+    <Copy ContinueOnError="false" SourceFiles="@(ForDropToolsDirectory)" DestinationFolder="$(DropToolsDirectory)" />
+  </Target>
+
+  <Target Name="CopyLicenseToAllDirectories">
+    <ItemGroup>
+      <LicenseFileItems Include="$(RootDirectory)\LICENSE.txt" />
+    </ItemGroup>
+    <Message Text="Copying the License to all drop directories" />
+    <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(DropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="CopyReportsToDropFolder">
+    <ItemGroup>
+      <Reports Include="$(ReportsDirectory)\*.html;
+                        $(ReportsDirectory)\*.xml" />
+    </ItemGroup>
+    <Message Text="Copying the Reports to drop directories" />
+    <Copy ContinueOnError="false" SourceFiles="@(Reports)" DestinationFiles="@(Reports -&gt;'$(DropReportsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  
+</Project>

@@ -1,0 +1,5 @@
+Webservice-Schema
+Copyright 2011 David Laing
+
+This product includes software developed at
+	CityIndex Ltd. (http://github.com/cityindex/RESTful-Webservice-Schema) (Apache 2.0 license)
