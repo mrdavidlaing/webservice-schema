@@ -23,7 +23,11 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
             foreach (Type type in types)
             {
                 var typeNode = type.GetXmlDocTypeNodeWithJSchema();
-                var jSchemaNode = typeNode.XPathSelectElement("jschema");
+                var jschemaXml =
+                    jschemaXmlComment.CreateFromXml(typeNode.XPathSelectElement("jschema"));
+
+                if (jschemaXml.Exclude)
+                    continue; //Skip to next type
 
                 var typeObj = new JObject();
                 typeObj["id"] = type.Name;
@@ -43,7 +47,10 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
 
                 ApplyDescription(typeObj, typeNode);
 
-                AppendDemoValueAttribute(typeObj, jSchemaNode);
+                if (jschemaXml.DemoValue != null)
+                {
+                    typeObj["demoValue"] = jschemaXml.DemoValue;
+                }
 
                 schemaProperties.Add(type.Name, typeObj);
                 
@@ -53,16 +60,6 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
 
         }
 
-        private static void AppendDemoValueAttribute(JObject typeObj, XElement jSchemaNode)
-        {
-
-            var node = jSchemaNode.Attribute("demoValue");
-            if (node != null)
-            {
-                typeObj["demoValue"] = node.Value;
-            }
-        }
-        
         private static void RenderEnum(Type type, JObject typeObj)
         {
             typeObj["type"] = "integer";

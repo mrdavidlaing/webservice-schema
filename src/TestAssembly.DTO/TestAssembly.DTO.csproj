@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="ArrayTypes.cs" />
     <Compile Include="Class1.cs" />
+    <Compile Include="ExcludedDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

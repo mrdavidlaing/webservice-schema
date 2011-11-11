@@ -53,6 +53,8 @@
     <Compile Include="DefectException.cs" />
     <Compile Include="JsonSchemaDTO\JsonSchemaDTOEmitter.cs" />
     <Compile Include="JsonSchemaDTO\MetadataValidationException.cs" />
+    <Compile Include="JsonSchemaDTO\jschemaXmlComment.cs" />
+    <Compile Include="XmlCommentBase.cs" />
     <Compile Include="JsonSchemaUtilities.cs" />
     <Compile Include="MetadataGenerationError.cs" />
     <Compile Include="MetadataGenerationResult.cs" />
