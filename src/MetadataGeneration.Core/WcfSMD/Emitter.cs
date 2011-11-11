@@ -65,7 +65,6 @@ namespace MetadataGeneration.Core.WcfSMD
 
             foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance))
             {
-
                 var methodElement = type.GetXmlDocMemberNodeWithSMD(type.FullName + "." + method.Name);
                 if (methodElement == null)
                 {
@@ -77,14 +76,14 @@ namespace MetadataGeneration.Core.WcfSMD
                 if (methodSmdElement == null)
                 {
                     result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type, "should not have gotten a method element without smd", "All services that have XML comments must have a <smd> tag.  See https://github.com/cityindex/RESTful-Webservice-Schema/wiki/Howto-write-XML-comments-for-SMD for details"));
-                    continue;
+                    continue; //advance to next service method
                 }
 
                 var smdXmlComment = SmdXmlComment.CreateFromXml(methodSmdElement);
                 
-                //Don't document methods that are market
+                //Don't document methods that are marked exclude
                 if (smdXmlComment.Exclude)
-                    continue;
+                    continue; //advance to next service method
 
                 JObject service = null;
                 var opContract = ReflectionUtils.GetAttribute<OperationContractAttribute>(method);
@@ -99,33 +98,38 @@ namespace MetadataGeneration.Core.WcfSMD
                     string methodTransport = null;
                     string methodEnvelope = null;
                     string methodUriTemplate = null;
+                    
                     if (webGet != null)
                     {
                         service = new JObject();
                         methodUriTemplate = FixUriTemplate(webGet.UriTemplate);
                         methodTransport = "GET";
-                        // TODO: FIXME: for some reason this is returning json string instead of json object when flxhr is used
-                        // is an odd interaction between flxhr and dojox.rpc.Service
-                        // HACK: use JSON envelope for now - results in not entirely correct smd but dojox behaves as it should
                         methodEnvelope = "URL";
-                        //methodEnvelope = "JSON"; 
                     }
                     else
                     {
                         var webInvoke = ReflectionUtils.GetAttribute<WebInvokeAttribute>(method);
                         if (webInvoke != null)
                         {
-                            // DAVID: NOTE: ignore problematic methods - using DELETE is simply problematic in many
-                            // aspects of a rest client, especially javascript. With the introduction of the extra logout
-                            // method, we can eliminate the only DELETE and move forward using GET/POST only
-                            if (webInvoke.Method == "POST")
-                            {
-                                service = new JObject();
-                                methodUriTemplate = FixUriTemplate(webInvoke.UriTemplate);
+                            service = new JObject();
+                            methodUriTemplate = FixUriTemplate(webInvoke.UriTemplate);
 
-                                methodTransport = "POST";
-                                methodEnvelope = "JSON";
+                            switch (webInvoke.Method.ToUpper())
+                            {
+                                case "POST":
+                                    methodTransport = "POST";
+                                    methodEnvelope = "JSON";
+                                    break;
+                                case "GET":
+                                    methodTransport = "GET";
+                                    methodEnvelope = "URL";
+                                    break;
+                                default:
+                                    result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type, 
+                                        string.Format("The {0} service has transport method of type {1} that is not supported", methodName, webInvoke.Method), "Service transports like DELETE or PUT are poorly supported by client http clients, so you advised to only use GET or POST"));
+                                     continue; //advance to next service method
                             }
+                           
                         }
                     }
 

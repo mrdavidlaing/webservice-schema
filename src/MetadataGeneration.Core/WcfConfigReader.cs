@@ -24,7 +24,7 @@ namespace MetadataGeneration.Core
             xmlDocSource.Routes = new List<RouteElement>();
             foreach (var item in routeNodes)
             {
-                RouteElement map = new RouteElement()
+                var map = new RouteElement()
                 {
                     Endpoint = item.Attribute("endpoint").Value /*+ item.Attribute("pathInfo").Value*/,
                     Name = item.Attribute("name").Value,

@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="IServiceWithDELETEandPUTMethods.cs" />
     <Compile Include="IPartiallyExcludedService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
