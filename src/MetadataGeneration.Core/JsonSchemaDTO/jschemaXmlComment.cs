@@ -3,17 +3,26 @@ using System.Xml.Linq;
 
 namespace MetadataGeneration.Core.JsonSchemaDTO
 {
-    public class jschemaXmlComment : XmlCommentBase
+    /// <summary>
+    /// TODO: expand accessors to include all possible attributes and explanations
+    /// </summary>
+    public class JschemaXmlComment : XmlCommentBase
     {
         public bool Exclude { get; set; }
         public string DemoValue { get; set; }
+        public XElement Element { get; set; }
 
-        public static jschemaXmlComment CreateFromXml(XElement xmlElement)
+        public static JschemaXmlComment CreateFromXml(XElement xmlElement)
         {
-            var smdXmlComment = new jschemaXmlComment
+            if(xmlElement==null)
+            {
+                return null;
+            }
+            var smdXmlComment = new JschemaXmlComment
                                     {
                                         DemoValue = GetAttributeValue(xmlElement, "demoValue", null),
-                                        Exclude = bool.Parse(GetAttributeValue(xmlElement, "exclude", "false"))
+                                        Exclude = bool.Parse(GetAttributeValue(xmlElement, "exclude", "false")),
+                                        Element = xmlElement
                                     };
 
             return smdXmlComment;

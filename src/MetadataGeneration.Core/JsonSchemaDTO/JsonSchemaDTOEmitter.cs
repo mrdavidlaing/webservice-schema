@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -13,8 +15,8 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
         public JObject EmitDtoJson(XmlDocSource xmlDocSource)
         {
             var schemaObj = new JObject();
-            var assemblies = xmlDocSource.Dtos.Select(a => a.Assembly);
-            
+            var assemblies = xmlDocSource.Dtos.Select(a => a.Assembly).ToArray();
+
             var schemaProperties = new JObject();
             schemaObj["properties"] = schemaProperties;
 
@@ -24,7 +26,7 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
             {
                 var typeNode = type.GetXmlDocTypeNodeWithJSchema();
                 var jschemaXml =
-                    jschemaXmlComment.CreateFromXml(typeNode.XPathSelectElement("jschema"));
+                    JschemaXmlComment.CreateFromXml(typeNode.XPathSelectElement("jschema"));
 
                 if (jschemaXml.Exclude)
                     continue; //Skip to next type
@@ -53,14 +55,14 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
                 }
 
                 schemaProperties.Add(type.Name, typeObj);
-                
+
             }
 
             return schemaObj;
 
         }
 
-        private static void RenderEnum(Type type, JObject typeObj)
+        public static void RenderEnum(Type type, JObject typeObj)
         {
             typeObj["type"] = "integer";
 
@@ -116,7 +118,7 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
             }
             return name;
         }
-        private static void RenderType(Type type, JObject typeObj)
+        public static void RenderType(Type type, JObject typeObj)
         {
             string typeName = type.Name;
 
@@ -142,44 +144,43 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
                 {
                     var pobj = new JObject();
                     properties[memberName] = pobj;
-                    var jsNode = pnode.XPathSelectElement("jschema");
-                    RenderTypeMeta(pobj, propertyInfo.PropertyType);
+                    var jschemaXml = JschemaXmlComment.CreateFromXml(pnode.XPathSelectElement("jschema"));
 
-                    foreach (var item in jsNode.Attributes())
+                    if (jschemaXml != null)
                     {
-                        string name = item.Name.ToString();
-                        string value = item.Value;
-                        ApplyPropertyAttribute(pobj, value, typeName, name);
-                    }
-                    ApplyDescription(pobj, pnode);
-                }
-            }
 
-            // do fields too - api team lets these slip by
-            foreach (var fieldInfo in type.GetFields())
-            {
-                string memberName = fieldInfo.Name;
-                var pnode = type.GetXmlDocPropertyNode(memberName);
-                if (pnode != null)
+                        if (!jschemaXml.Exclude)
+                        {
+                            RenderTypeMeta(pobj, propertyInfo.PropertyType);
+
+                            foreach (var item in jschemaXml.Element.Attributes())
+                            {
+                                string name = item.Name.ToString();
+                                string value = item.Value;
+                                ApplyPropertyAttribute(pobj, value, typeName, name);
+                            }
+                            ApplyDescription(pobj, pnode);                        
+                            
+                        }
+                    }
+                    else
+                    {
+                        throw new MetadataValidationException(type.FullName + "." + memberName + " does not have <jschema> element. All DTO properties must have a jschema element", "All DTO properties must have <jschema> element. If you wish to exclude the property use the exclude='true' in jschema");    
+                    }
+                }
+                else
                 {
-                    // TODO: should we emit a warning?
-
-                    var pobj = new JObject();
-                    properties[memberName] = pobj;
-                    var jsNode = pnode.XPathSelectElement("jschema");
-                    RenderTypeMeta(pobj, fieldInfo.FieldType);
-
-                    foreach (var item in jsNode.Attributes())
-                    {
-                        string name = item.Name.ToString();
-                        string value = item.Value;
-                        ApplyPropertyAttribute(pobj, value, typeName, name);
-                    }
-                    ApplyDescription(pobj, pnode);
-
+                    throw new MetadataValidationException(type.FullName + "." + memberName + " is not documented with XML docs. All DTO properties must be documented with XML docs", "Document " + type.FullName + "." + memberName + " with XML Docs");
                 }
-
             }
+
+            // #TODO - throw if public fields are present
+
+            if (type.GetFields().Length != 0)
+            {
+                throw new MetadataValidationException("A DTO type must not implement public fields", "Change field to property by adding {get;set;}");
+            }
+
 
         }
         
@@ -433,11 +434,11 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
 
             // at this point type variable should contain the underlying type
 
-            
+
             JObject typeObj;
 
             typeObj = type.GetSchemaType();
-            
+
             if (isNullable)
             {
                 if (isArray)
@@ -473,7 +474,7 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
             {
                 jobj[item.Key] = item.Value;
             }
-            
+
 
         }
 

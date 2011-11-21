@@ -9,6 +9,51 @@ namespace MetadataGeneration.Core.Tests
     public class JsonSchemaDtoEmitterTests: TestBase 
     {
         [Test]
+        public void APropertyWithPublicFieldShouldThrow()
+        {
+            try
+            {
+                var type = typeof(TestAssembly.BadDTO.ClassWithPublicField);
+                JsonSchemaDtoEmitter.RenderType(type, new JObject());
+            }
+            catch (MetadataValidationException ex)
+            {
+
+                Assert.AreEqual("A DTO type must not implement public fields", ex.Message);
+            }
+        }
+        [Test]
+        public void APropertyMissingJschemaShouldThrow()
+        {
+            try
+            {
+                var type = typeof(TestAssembly.BadDTO.ClassWithMissingPropertyJschema);
+                JsonSchemaDtoEmitter.RenderType(type, new JObject());
+            }
+            catch (MetadataValidationException ex)
+            {
+
+                Assert.AreEqual("TestAssembly.BadDTO.ClassWithMissingPropertyJschema.AProperty does not have <jschema> element. All DTO properties must have a jschema element", ex.Message);
+            }
+        }
+        [Test]
+        public void TypesMissingDocsAndJschemaShouldThrow()
+        {
+            
+            try
+            {
+                UtilityExtensions.GetSchemaTypes(typeof(TestAssembly.BadDTO.ClassWithNoDocs).Assembly);    
+            }
+            catch (MetadataValidationException ex)
+            {
+
+                Assert.AreEqual("Types have no XML Documentation: TestAssembly.BadDTO.ClassWithNoDocs\nTypes have no jschema element. Use exclude='true' if necessary: TestAssembly.BadDTO.ClassWithNoJschema", ex.Message);
+            }
+
+            
+            
+        }
+        [Test]
         public void AllArrayTypesShouldBeDescribedAsArray()
         {
             var jsonSchema = GenerateJsonSchemaForTestAssemblyDTO();

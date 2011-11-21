@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 
 // need an isolated assembly for testing
@@ -12,6 +13,7 @@ namespace MetadataProcessor.DTOTestAssembly
     /// </summary>
     /// <jschema
     /// />
+    [DataContract]
     public class Class1
     {
         ///<summary>
@@ -43,6 +45,7 @@ namespace MetadataProcessor.DTOTestAssembly
     ///<summary>
     ///</summary>
     /// <jschema/>
+    [DataContract]
     public class Class2
     {
         ///<summary>
@@ -54,6 +57,7 @@ namespace MetadataProcessor.DTOTestAssembly
     ///<summary>
     ///</summary>
     /// <jschema/>
+    [DataContract]
     public class DerivedClass2:Class2
     {
         
@@ -63,6 +67,7 @@ namespace MetadataProcessor.DTOTestAssembly
     /// 
     /// </summary>
     /// <jschema/>
+    [DataContract]
     public enum EnumType
     {
         ///<summary>

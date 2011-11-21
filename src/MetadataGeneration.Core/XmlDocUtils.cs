@@ -58,40 +58,48 @@ namespace MetadataGeneration.Core
             }
             return node2;
         }
-        public static XElement GetXmlDocNodeJschema(this Type type, string typeName, string memberName)
+        public static XElement GetXmlDocNode(this Type type, string typeName, string memberName)
         {
             XDocument doc = type.GetXmlDocs();
             var node = doc.XPathSelectElement("/doc/members/member[@name = '" + typeName + ":" + memberName + "']");
-            if (node != null)
-            {
-                if (node.XPathSelectElement("jschema") == null)
-                {
-                    node = null;
-                }
-            }
-
+            
             return node;
         }
 
         public static XElement GetXmlDocTypeNode(this Type type)
         {
-            return type.GetXmlDocNodeJschema("T", type.FullName);
+            XDocument doc = type.GetXmlDocs();
+            var node = doc.XPathSelectElement("/doc/members/member[@name = 'T:" + type.FullName + "']");
+            return node;
+
+            
         }
 
 
         public static XElement GetXmlDocMemberNode(this Type type, string name)
         {
-            return type.GetXmlDocNodeJschema("M", type.FullName + "." + name);
+            return type.GetXmlDocNode("M", type.FullName + "." + name);
         }
 
         public static XElement GetXmlDocFieldNode(this Type type, string name)
         {
-            return type.GetXmlDocNodeJschema("F", type.FullName + "." + name);
+            return type.GetXmlDocNode("F", type.FullName + "." + name);
         }
+
 
         public static XElement GetXmlDocPropertyNode(this Type type, string name)
         {
-            return type.GetXmlDocNodeJschema("P", type.FullName + "." + name);
+            var t = type;
+            XElement element = t.GetXmlDocNode("P", t.FullName + "." + name);
+
+            // properties are documented on the declaring type, so if not overridden
+            // then we need to drill down to the base type
+            while (element == null && t.BaseType != null && !t.BaseType.FullName.StartsWith("System"))
+            {
+                t = t.BaseType;
+                element = t.GetXmlDocNode("P", t.FullName + "." + name);
+            }
+            return element;
         }
         public static void EnsureXmlDocsAreValid(XmlDocSource xmlDocSource)
         {

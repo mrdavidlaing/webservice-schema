@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace MetadataProcessor.DTOTestAssembly
 {
@@ -6,6 +7,7 @@ namespace MetadataProcessor.DTOTestAssembly
     /// All these types become arrays
     /// </summary>
     /// <jschema/>
+    [DataContract]
     public class ArrayTypes
     {
         ///<summary>

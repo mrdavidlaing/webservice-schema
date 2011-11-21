@@ -63,9 +63,53 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="testAssemblies\flex.properties" />
+    <None Include="testAssemblies\log4net.config" />
+    <None Include="testAssemblies\Web.config" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="testAssemblies\" />
+    <Content Include="testAssemblies\AccountInformationGatewayDTO.dll" />
+    <Content Include="testAssemblies\ActiveMQPubSub.dll" />
+    <Content Include="testAssemblies\ajax.js" />
+    <Content Include="testAssemblies\Apache.NMS.ActiveMQ.dll" />
+    <Content Include="testAssemblies\Apache.NMS.dll" />
+    <Content Include="testAssemblies\AuthenticationGatewayDTO.dll" />
+    <Content Include="testAssemblies\GatewayCoreDTO.dll" />
+    <Content Include="testAssemblies\Handlers.dll" />
+    <Content Include="testAssemblies\HedgeGatewayDTO.dll" />
+    <Content Include="testAssemblies\IPGatewayDTO.dll" />
+    <Content Include="testAssemblies\log4net.dll" />
+    <Content Include="testAssemblies\log4net.xml" />
+    <Content Include="testAssemblies\lsblank.html" />
+    <Content Include="testAssemblies\lscommons.js" />
+    <Content Include="testAssemblies\lsengine.html" />
+    <Content Include="testAssemblies\lsengine.js" />
+    <Content Include="testAssemblies\lsform.html" />
+    <Content Include="testAssemblies\lspushpage.js" />
+    <Content Include="testAssemblies\MarketSearchGatewayDTO.dll" />
+    <Content Include="testAssemblies\MessageGatewayDTO.dll" />
+    <Content Include="testAssemblies\MetadataProcessor.dll" />
+    <Content Include="testAssemblies\Microsoft.ServiceModel.Web.dll" />
+    <Content Include="testAssemblies\MockRequest.dll" />
+    <Content Include="testAssemblies\NewsGatewayDTO.dll" />
+    <Content Include="testAssemblies\ObjectPooling.dll" />
+    <Content Include="testAssemblies\OrderGatewayDTO.dll" />
+    <Content Include="testAssemblies\PriceHistoryGatewayDTO.dll" />
+    <Content Include="testAssemblies\RESTWebServices.ActiveMQPubSubWrapper.dll" />
+    <Content Include="testAssemblies\RESTWebServices.Configuration.dll" />
+    <Content Include="testAssemblies\RESTWebServices.dll" />
+    <Content Include="testAssemblies\RESTWebServices.Messaging.dll" />
+    <Content Include="testAssemblies\RESTWebServices.XDRSupport.dll" />
+    <Content Include="testAssemblies\RESTWebServices.XML" />
+    <Content Include="testAssemblies\RESTWebServicesDTO.dll" />
+    <Content Include="testAssemblies\RESTWebServicesDTO.xml" />
+    <Content Include="testAssemblies\SimulationGatewayDTO.dll" />
+    <Content Include="testAssemblies\TradingApi.CoreDTO.dll" />
+    <Content Include="testAssemblies\TradingApi.CoreDTO.xml" />
+    <Content Include="testAssemblies\UTPMessaging.dll" />
+    <Content Include="testAssemblies\WatchlistGatewayDTO.dll" />
+    <Content Include="testAssemblies\WCFRequestContextFacade.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

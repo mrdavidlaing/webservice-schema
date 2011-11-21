@@ -40,9 +40,13 @@ namespace MetadataGenerator
 
                 var smdResults = generator.GenerateSmd(xmlDocSource, jsonSchemaResults.JsonSchema);
 
-                var streaming = File.ReadAllText(streamingSMD);
-                generator.AddStreamingSMD(smdResults.SMD, streaming);
-
+                if(!string.IsNullOrEmpty(streamingSMD))
+                {
+                    var streaming = File.ReadAllText(streamingSMD);
+                    generator.AddStreamingSMD(smdResults.SMD, streaming);
+    
+                }
+                
                 File.WriteAllText(smdOutputFileName, smdResults.SMD.ToString());
 
                 if (jsonSchemaResults.HasErrors || smdResults.HasErrors)
