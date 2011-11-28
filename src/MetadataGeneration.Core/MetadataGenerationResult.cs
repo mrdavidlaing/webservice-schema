@@ -1,11 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace MetadataGeneration.Core
 {
     public class MetadataGenerationResult
     {
+        public MetadataGenerationResult()
+        {
+            JsonSchema = JObject.Parse("{\"properties\": {} }");
+        }
         public bool HasErrors
         {
             get { return _metadataGenerationErrors.Count > 0; }

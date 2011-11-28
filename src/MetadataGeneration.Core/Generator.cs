@@ -17,7 +17,17 @@ namespace MetadataGeneration.Core
             results.AddValidationResults(new Auditor().AuditTypes(xmlDocSource));
 
             //Creates Jschema for all DTO types where it can find XML docs
-            results.JsonSchema = new JsonSchemaDtoEmitter().EmitDtoJson(xmlDocSource);
+            try
+            {
+                results.JsonSchema = new JsonSchemaDtoEmitter().EmitDtoJson(xmlDocSource);
+            }
+            catch (MetadataValidationException e)
+            {
+                foreach (var metadataValidationException in e.AggregatedExceptions)
+                {
+                    results.MetadataGenerationErrors.Add(new MetadataGenerationError(MetadataType.JsonSchema,typeof(object), metadataValidationException));    
+                }
+            }
 
             return results;
         }
