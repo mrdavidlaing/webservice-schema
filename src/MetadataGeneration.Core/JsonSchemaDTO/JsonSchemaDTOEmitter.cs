@@ -120,6 +120,8 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
         }
         public static void RenderType(Type type, JObject typeObj)
         {
+            var typeException = new TypeMetadataValidationException(type, "Errors occured generating type meta.",
+                                                                    "See aggregated exceptions.");
             string typeName = type.Name;
 
             typeObj["type"] = "object";
@@ -165,22 +167,26 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
                     }
                     else
                     {
-                        throw new MetadataValidationException(type.FullName + "." + memberName + " does not have <jschema> element. All DTO properties must have a jschema element", "All DTO properties must have <jschema> element. If you wish to exclude the property use the exclude='true' in jschema");    
+                        typeException.AggregatedExceptions.Add(new MethodMetadataValidationException(memberName , type,"Method does not have <jschema> element. All DTO properties must have a jschema element", "All DTO properties must have <jschema> element. If you wish to exclude the property use the exclude='true' in jschema"));
                     }
                 }
                 else
                 {
-                    throw new MetadataValidationException(type.FullName + "." + memberName + " is not documented with XML docs. All DTO properties must be documented with XML docs", "Document " + type.FullName + "." + memberName + " with XML Docs");
+                    typeException.AggregatedExceptions.Add(new MethodMetadataValidationException(memberName, type, "Method is not documented with XML docs. All DTO properties must be documented with XML docs", "Document method with xml documentation as well as jschema element"));
                 }
             }
 
             // #TODO - throw if public fields are present
-
-            if (type.GetFields().Length != 0)
+            foreach (var  field in type.GetFields())
             {
-                throw new MetadataValidationException("A DTO type must not implement public fields", "Change field to property by adding {get;set;}");
+                typeException.AggregatedExceptions.Add(new MethodMetadataValidationException(field.Name, type, "A DTO type must not implement public fields", "Change field to property by adding {get;set;}"));
+                
             }
-
+            
+            if(typeException.AggregatedExceptions.Count>0)
+            {
+                throw typeException;
+            }
 
         }
         

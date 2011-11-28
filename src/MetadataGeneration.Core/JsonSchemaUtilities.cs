@@ -425,7 +425,7 @@ namespace MetadataGeneration.Core
 
         public static JObject BuildTypeSchema(Type type, XDocument doc, bool includeDemoValue)
         {
-            
+
             var typeElement = GetMemberNode(doc, "T:" + type.FullName);
             if (typeElement != null)
             {
@@ -600,7 +600,7 @@ namespace MetadataGeneration.Core
 
                 case TypeCode.Object:
                     JObject obj = new JObject();
-                    obj["$ref"] = type.Name;
+                    obj["$ref"] = "#/" + type.Name;
                     typeObj["type"] = obj;
                     break;
                 case TypeCode.DBNull:

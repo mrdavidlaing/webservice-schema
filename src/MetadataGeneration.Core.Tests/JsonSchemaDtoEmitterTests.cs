@@ -19,7 +19,7 @@ namespace MetadataGeneration.Core.Tests
             catch (MetadataValidationException ex)
             {
 
-                Assert.AreEqual("A DTO type must not implement public fields", ex.Message);
+                Assert.AreEqual("TestAssembly.BadDTO.ClassWithPublicField : Errors occured generating type meta.\r\nTestAssembly.BadDTO.ClassWithPublicField.AProperty : A DTO type must not implement public fields\r\n", ex.ToString());
             }
         }
         [Test]
@@ -30,10 +30,12 @@ namespace MetadataGeneration.Core.Tests
                 var type = typeof(TestAssembly.BadDTO.ClassWithMissingPropertyJschema);
                 JsonSchemaDtoEmitter.RenderType(type, new JObject());
             }
-            catch (MetadataValidationException ex)
+            catch (TypeMetadataValidationException ex)
             {
+                Assert.AreEqual(1,ex.AggregatedExceptions.Count,"should have one exception");
+                Assert.AreEqual("TestAssembly.BadDTO.ClassWithMissingPropertyJschema : Errors occured generating type meta.\r\nTestAssembly.BadDTO.ClassWithMissingPropertyJschema.AProperty : Method does not have <jschema> element. All DTO properties must have a jschema element\r\n", ex.ToString());
 
-                Assert.AreEqual("TestAssembly.BadDTO.ClassWithMissingPropertyJschema.AProperty does not have <jschema> element. All DTO properties must have a jschema element", ex.Message);
+
             }
         }
         [Test]

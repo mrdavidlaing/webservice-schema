@@ -80,7 +80,7 @@ namespace MetadataGeneration.Core.WcfSMD
                 }
 
                 var smdXmlComment = SmdXmlComment.CreateFromXml(methodSmdElement);
-                
+
                 //Don't document methods that are marked exclude
                 if (smdXmlComment.Exclude)
                     continue; //advance to next service method
@@ -98,7 +98,7 @@ namespace MetadataGeneration.Core.WcfSMD
                     string methodTransport = null;
                     string methodEnvelope = null;
                     string methodUriTemplate = null;
-                    
+
                     if (webGet != null)
                     {
                         service = new JObject();
@@ -125,11 +125,11 @@ namespace MetadataGeneration.Core.WcfSMD
                                     methodEnvelope = "URL";
                                     break;
                                 default:
-                                    result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type, 
+                                    result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type,
                                         string.Format("The {0} service has transport method of type {1} that is not supported", methodName, webInvoke.Method), "Service transports like DELETE or PUT are poorly supported by client http clients, so you advised to only use GET or POST"));
-                                     continue; //advance to next service method
+                                    continue; //advance to next service method
                             }
-                           
+
                         }
                     }
 
@@ -171,29 +171,29 @@ namespace MetadataGeneration.Core.WcfSMD
                                 {
                                     result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type, "Schema missing referenced return type " + methodReturnTypeName + " for method " + method.Name, "All types used by services must be decorated with the <jschema> tag.  See https://github.com/cityindex/RESTful-Webservice-Schema/wiki/Howto-write-XML-comments-for-JSchema"));
                                 }
-                                returnType = new JObject(new JProperty("$ref", methodReturnTypeName));
+                                returnType = new JObject(new JProperty("$ref", "#/" + methodReturnTypeName));
                             }
                             else
                             {
                                 returnType = null;
                             }
-                            
+
 
                         }
                         else if (Type.GetTypeCode(method.ReturnType) == TypeCode.Empty)
                         {
                             returnType = null;
-                            
+
                         }
                         else
                         {
-                            returnType = new JObject(new JProperty("type", method.ReturnType.GetSchemaType()["type"].Value<string>()));
+                            returnType = new JObject(new JProperty("type", "#/" + method.ReturnType.GetSchemaType()["type"].Value<string>()));
                         }
                         if (returnType != null)
                         {
                             service.Add("returns", returnType);
                         }
-                        
+
                         SetStringAttribute(methodSmdElement, service, "group");
                         SetIntAttribute(methodSmdElement, service, "cacheDuration");
                         SetStringAttribute(methodSmdElement, service, "throttleScope");
