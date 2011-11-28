@@ -12,6 +12,7 @@ namespace MetadataGeneration.Core.WcfSMD
 {
     public class Emitter
     {
+        
 
         public MetadataGenerationResult EmitSmdJson(XmlDocSource xmlDocSource, bool includeDemoValue, JObject schema)
         {
@@ -171,7 +172,7 @@ namespace MetadataGeneration.Core.WcfSMD
                                 {
                                     result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type, "Schema missing referenced return type " + methodReturnTypeName + " for method " + method.Name, "All types used by services must be decorated with the <jschema> tag.  See https://github.com/cityindex/RESTful-Webservice-Schema/wiki/Howto-write-XML-comments-for-JSchema"));
                                 }
-                                returnType = new JObject(new JProperty("$ref", "#/" + methodReturnTypeName));
+                                returnType = new JObject(new JProperty("$ref", JsonSchemaUtilities.RootDelimiter + methodReturnTypeName));
                             }
                             else
                             {

@@ -12,6 +12,8 @@ namespace MetadataGeneration.Core
 {
     public static class JsonSchemaUtilities
     {
+        public const string RootDelimiter = "#.";
+
         private const bool SwallowAttributeErrors = false;
 
         public static Type GetNullableTypeIfAny(Type type)
@@ -176,7 +178,7 @@ namespace MetadataGeneration.Core
             }
             else
             {
-                jsPropertyValue.Add("$ref", "#/" + targetType.Name);
+                jsPropertyValue.Add("$ref", JsonSchemaUtilities.RootDelimiter + targetType.Name);
             }
 
 
@@ -461,7 +463,7 @@ namespace MetadataGeneration.Core
                             if (type.BaseType != null && type.BaseType.IsClass && type.BaseType != typeof(object))
                             {
                                 // must be derived from one of our classes
-                                var propObj = new JObject(new JProperty("$ref", "#/" + type.BaseType.Name));
+                                var propObj = new JObject(new JProperty("$ref", JsonSchemaUtilities.RootDelimiter + type.BaseType.Name));
                                 jsob.Add(new JProperty("extends", propObj));
                             }
 
@@ -600,7 +602,7 @@ namespace MetadataGeneration.Core
 
                 case TypeCode.Object:
                     JObject obj = new JObject();
-                    obj["$ref"] = "#/" + type.Name;
+                    obj["$ref"] = RootDelimiter + type.Name;
                     typeObj["type"] = obj;
                     break;
                 case TypeCode.DBNull:
