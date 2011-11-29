@@ -61,7 +61,7 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
                 }
                 catch (MetadataValidationException ex)
                 {
-                    exception.AggregatedExceptions.Add(exception);
+                    exception.AggregatedExceptions.Add(ex);
                 }
 
             }

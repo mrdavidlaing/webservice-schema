@@ -36,7 +36,8 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
 
         public override string ToString()
         {
-            string message = Type.FullName + "." + Method + " : " + Message + Environment.NewLine + string.Join(Environment.NewLine , AggregatedExceptions.Select(e => "\t"+e.ToString()));
+            string aggregated = string.Join(Environment.NewLine, AggregatedExceptions.Select(e => "\t" + e.ToString()));
+            string message = Type.FullName + "." + Method + " : " + Message + Environment.NewLine + aggregated;
             return message;
         }
     }
