@@ -143,10 +143,7 @@ namespace MetadataGeneration.Core
 
             // determine if targetType is a collection type 
 
-            // string type name comparison is a hack but the alternative is a lot more code with no added value
-            if (targetType.Name.EndsWith("[]") || targetType.Name.StartsWith("List")
-                || targetType.Name.StartsWith("IList") || targetType.Name.StartsWith("ICollection")
-                || targetType.Name.StartsWith("IEnumerable"))
+            if (targetType.IsArray || targetType == typeof(List<>) || targetType == typeof(IList<>) || targetType == typeof(ICollection<>) || targetType == typeof(IEnumerable<>))
             {
 
                 if (targetType.IsGenericType)

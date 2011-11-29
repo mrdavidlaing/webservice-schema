@@ -137,7 +137,9 @@ namespace MetadataGeneration.Core.WcfSMD
                     if (service != null)
                     {
                         JsonSchemaUtilities.ApplyDescription(service, methodElement);
-                        service.Add("target", methodTarget.TrimEnd('/'));
+                        string methodTargetTrimEnd = methodTarget.TrimEnd('/');
+                        
+                        service.Add("target", methodTargetTrimEnd);
 
                         if (!string.IsNullOrWhiteSpace(methodUriTemplate))
                         {
@@ -188,7 +190,7 @@ namespace MetadataGeneration.Core.WcfSMD
                         }
                         else
                         {
-                            returnType = new JObject(new JProperty("type", "#/" + method.ReturnType.GetSchemaType()["type"].Value<string>()));
+                            returnType = new JObject(new JProperty("type",  method.ReturnType.GetSchemaType()["type"].Value<string>()));
                         }
                         if (returnType != null)
                         {

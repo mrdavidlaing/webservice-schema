@@ -102,7 +102,7 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
                 if (fieldNode != null)
                 {
                     // TODO: may have to do some re-encoding
-                    description = fieldNode.Value;
+                    description = fieldNode.Value.Trim();
                 }
 
                 option["description"] = description;
