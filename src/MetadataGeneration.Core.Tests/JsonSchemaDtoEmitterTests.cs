@@ -30,7 +30,7 @@ namespace MetadataGeneration.Core.Tests
                 var type = typeof(TestAssembly.BadDTO.ClassWithMissingPropertyJschema);
                 JsonSchemaDtoEmitter.RenderType(type, new JObject());
             }
-            catch (TypeMetadataValidationException ex)
+            catch (MetadataValidationException ex)
             {
                 Assert.AreEqual(1,ex.AggregatedExceptions.Count,"should have one exception");
                 Assert.AreEqual("TestAssembly.BadDTO.ClassWithMissingPropertyJschema : Errors occured generating type meta.\r\nTestAssembly.BadDTO.ClassWithMissingPropertyJschema.AProperty : Method does not have <jschema> element. All DTO properties must have a jschema element\r\n", ex.ToString());

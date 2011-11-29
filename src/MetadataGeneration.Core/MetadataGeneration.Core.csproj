@@ -50,7 +50,7 @@
   <ItemGroup>
     <Compile Include="AssemblyWithXmlDocs.cs" />
     <Compile Include="Generator.cs" />
-    <Compile Include="JsonSchemaDTO\Auditor.cs" />
+    <None Include="JsonSchemaDTO\Auditor.cs" />
     <Compile Include="DefectException.cs" />
     <Compile Include="JsonSchemaDTO\JsonSchemaDTOEmitter.cs" />
     <Compile Include="JsonSchemaDTO\MetadataValidationException.cs" />

@@ -14,7 +14,8 @@ namespace MetadataGeneration.Core
             XmlDocUtils.EnsureXmlDocsAreValid(xmlDocSource);
 
             //Checks that each DTO type can be documented
-            results.AddValidationResults(new Auditor().AuditTypes(xmlDocSource));
+            // merge canemittype to emitter
+            //results.AddValidationResults(new Auditor().AuditTypes(xmlDocSource));
 
             //Creates Jschema for all DTO types where it can find XML docs
             try
@@ -23,10 +24,7 @@ namespace MetadataGeneration.Core
             }
             catch (MetadataValidationException e)
             {
-                foreach (var metadataValidationException in e.AggregatedExceptions)
-                {
-                    results.MetadataGenerationErrors.Add(new MetadataGenerationError(MetadataType.JsonSchema,typeof(object), metadataValidationException));    
-                }
+                results.MetadataGenerationErrors.Add(new MetadataGenerationError(MetadataType.JsonSchema, typeof(object), e));    
             }
 
             return results;

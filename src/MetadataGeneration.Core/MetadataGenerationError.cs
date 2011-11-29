@@ -22,16 +22,22 @@ namespace MetadataGeneration.Core
         public MetadataGenerationError(MetadataType metadataType, Type type, MetadataValidationException metadataValidationException):
             this(metadataType, type, metadataValidationException.Message, metadataValidationException.SuggestedSolution)
         {
-            
+            MetadataValidationException = metadataValidationException;
         }
 
+        public MetadataValidationException MetadataValidationException { get; private set; }
         public MetadataType MetadataType { get; private set; }
         public Type Type { get; private set; }
         public string ErrorReason { get; private set; }
         public string SuggestedSolution { get; private set; }
         public override string ToString()
         {
-            return string.Format("MetadataGenerationError: MetadataType={0}, Type={1},\r\n\tErrorReason={2},\r\n\tSuggestedSolution={3}", MetadataType, Type, ErrorReason, SuggestedSolution);
+            string message = string.Format("MetadataGenerationError: MetadataType={0}, Type={1},\r\n\tErrorReason={2},\r\n\tSuggestedSolution={3}", MetadataType, Type, ErrorReason, SuggestedSolution);
+            if (MetadataValidationException!=null)
+            {
+                message += Environment.NewLine + MetadataValidationException.ToString();
+            }
+            return message;
         }
     }
 }

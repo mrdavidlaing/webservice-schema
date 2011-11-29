@@ -55,15 +55,15 @@ namespace MetadataGeneration.Core
             var errorMessage = "";
             if (noXmlDocTypes.Count > 0)
             {
-                errorMessage = "Types have no XML Documentation: " + string.Join(",", noXmlDocTypes.Select(t => t.FullName).ToArray());
+                errorMessage = "Types have no XML Documentation: " + string.Join("\n\t", noXmlDocTypes.Select(t => t.FullName).ToArray());
             }
             if (noJschemaTypes.Count > 0)
             {
-                errorMessage = errorMessage + "\nTypes have no jschema element. Use exclude='true' if necessary: " + string.Join(",", noJschemaTypes.Select(t => t.FullName).ToArray());
+                errorMessage = errorMessage + "\nTypes have no jschema element. Use exclude='true' if necessary: " + string.Join("\n\t", noJschemaTypes.Select(t => t.FullName).ToArray());
             }
             if (!string.IsNullOrEmpty(errorMessage))
             {
-                throw new MetadataValidationException(errorMessage, "add XmlDocs to types and include a jschema element. If type must be excluded from meta, use exclude='true'");
+                throw new MetadataValidationException(typeof(Object),"",errorMessage, "add XmlDocs to types and include a jschema element. If type must be excluded from meta, use exclude='true'");
             }
             return schemaTypes;
         }

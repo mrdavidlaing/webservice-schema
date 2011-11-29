@@ -21,43 +21,55 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
             schemaObj["properties"] = schemaProperties;
 
             var types = UtilityExtensions.GetSchemaTypes(assemblies);
-
+            var exception = new MetadataValidationException(typeof (object), "", "Errors generating meta for types", "");
             foreach (Type type in types)
             {
-                var typeNode = type.GetXmlDocTypeNodeWithJSchema();
-                var jschemaXml =
-                    JschemaXmlComment.CreateFromXml(typeNode.XPathSelectElement("jschema"));
-
-                if (jschemaXml.Exclude)
-                    continue; //Skip to next type
-
-                var typeObj = new JObject();
-                typeObj["id"] = type.Name;
-
-                if (type.IsEnum)
+                try
                 {
-                    RenderEnum(type, typeObj);
-                }
-                else if (type.IsClass)
-                {
-                    RenderType(type, typeObj);
-                }
-                else
-                {
-                    throw new NotSupportedException(type.Name + " is not supported ");
-                }
 
-                ApplyDescription(typeObj, typeNode);
+                    var typeNode = type.GetXmlDocTypeNodeWithJSchema();
+                    var jschemaXml =
+                        JschemaXmlComment.CreateFromXml(typeNode.XPathSelectElement("jschema"));
 
-                if (jschemaXml.DemoValue != null)
-                {
-                    typeObj["demoValue"] = jschemaXml.DemoValue;
+                    if (jschemaXml.Exclude)
+                        continue; //Skip to next type
+
+                    var typeObj = new JObject();
+                    typeObj["id"] = type.Name;
+
+                    if (type.IsEnum)
+                    {
+                        RenderEnum(type, typeObj);
+                    }
+                    else if (type.IsClass)
+                    {
+                        RenderType(type, typeObj);
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(type.Name + " is not supported ");
+                    }
+
+                    ApplyDescription(typeObj, typeNode);
+
+                    if (jschemaXml.DemoValue != null)
+                    {
+                        typeObj["demoValue"] = jschemaXml.DemoValue;
+                    }
+
+                    schemaProperties.Add(type.Name, typeObj);
                 }
-
-                schemaProperties.Add(type.Name, typeObj);
+                catch (MetadataValidationException ex)
+                {
+                    exception.AggregatedExceptions.Add(exception);
+                }
 
             }
 
+            if (exception.AggregatedExceptions.Count>0)
+            {
+                throw exception;
+            }
             return schemaObj;
 
         }
@@ -120,8 +132,7 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
         }
         public static void RenderType(Type type, JObject typeObj)
         {
-            var typeException = new TypeMetadataValidationException(type, "Errors occured generating type meta.",
-                                                                    "See aggregated exceptions.");
+            var typeException = new MetadataValidationException(type,"", "Errors occured generating type meta.","See aggregated exceptions.");
             string typeName = type.Name;
 
             typeObj["type"] = "object";
@@ -167,19 +178,19 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
                     }
                     else
                     {
-                        typeException.AggregatedExceptions.Add(new MethodMetadataValidationException(memberName , type,"Method does not have <jschema> element. All DTO properties must have a jschema element", "All DTO properties must have <jschema> element. If you wish to exclude the property use the exclude='true' in jschema"));
+                        typeException.AggregatedExceptions.Add(new MetadataValidationException(type, memberName, "Member does not have <jschema> element. All DTO properties must have a jschema element", "All DTO properties must have <jschema> element. If you wish to exclude the property use the exclude='true' in jschema"));
                     }
                 }
                 else
                 {
-                    typeException.AggregatedExceptions.Add(new MethodMetadataValidationException(memberName, type, "Method is not documented with XML docs. All DTO properties must be documented with XML docs", "Document method with xml documentation as well as jschema element"));
+                    typeException.AggregatedExceptions.Add(new MetadataValidationException(type, memberName, "Member is not documented with XML docs. All DTO properties must be documented with XML docs", "Document method with xml documentation as well as jschema element"));
                 }
             }
 
             // #TODO - throw if public fields are present
             foreach (var  field in type.GetFields())
             {
-                typeException.AggregatedExceptions.Add(new MethodMetadataValidationException(field.Name, type, "A DTO type must not implement public fields", "Change field to property by adding {get;set;}"));
+                typeException.AggregatedExceptions.Add(new MetadataValidationException(type, field.Name, "A DTO type must not implement public fields", "Change field to property by adding {get;set;}"));
                 
             }
             

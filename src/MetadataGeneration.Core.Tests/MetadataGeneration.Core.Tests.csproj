@@ -55,7 +55,7 @@
   <ItemGroup>
     <Compile Include="AssemblyWithXmlDocsTests.cs" />
     <Compile Include="SMDEmitterTests.cs" />
-    <Compile Include="AuditorTests.cs" />
+    <None Include="AuditorTests.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="JsonSchemaDtoEmitterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

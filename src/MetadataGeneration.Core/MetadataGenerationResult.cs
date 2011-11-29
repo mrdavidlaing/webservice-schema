@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -42,8 +43,8 @@ namespace MetadataGeneration.Core
         {
             var str = string.Format("HasErrors={0}\n", HasErrors);
             if (HasErrors)
-                str += string.Format("Errors:\n{0}", MetadataGenerationErrors.Select(e => e.ToString()));
-            str += string.Format("Success:\n{0}", MetadataGenerationSuccesses.Select(e => e.ToString()));
+                str += string.Format("\n------------------\nErrors:\n{0}", string.Join(Environment.NewLine, MetadataGenerationErrors.Select(e => e.ToString())));
+            str += string.Format("\n------------------\nSuccess:\n{0}", string.Join(Environment.NewLine, MetadataGenerationSuccesses.Select(e => e.ToString())));
             return str;
         }
     }

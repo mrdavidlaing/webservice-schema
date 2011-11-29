@@ -12,5 +12,9 @@ namespace MetadataGeneration.Core
 
         public MetadataType MetadataType { get; private set; }
         public Type Type { get; private set; }
+        public override string ToString()
+        {
+            return string.Format("{0} : {1}",MetadataType,Type);
+        }
     }
 }
