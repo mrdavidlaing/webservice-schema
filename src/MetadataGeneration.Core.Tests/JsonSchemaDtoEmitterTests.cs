@@ -19,7 +19,7 @@ namespace MetadataGeneration.Core.Tests
             catch (MetadataValidationException ex)
             {
 
-                Assert.AreEqual("TestAssembly.BadDTO.ClassWithPublicField : Errors occured generating type meta.\r\nTestAssembly.BadDTO.ClassWithPublicField.AProperty : A DTO type must not implement public fields\r\n", ex.ToString());
+                Assert.AreEqual("TestAssembly.BadDTO.ClassWithPublicField. : Errors occured generating type meta.\r\n\tTestAssembly.BadDTO.ClassWithPublicField.AProperty : A DTO type must not implement public fields\r\n", ex.ToString());
             }
         }
         [Test]
@@ -33,7 +33,7 @@ namespace MetadataGeneration.Core.Tests
             catch (MetadataValidationException ex)
             {
                 Assert.AreEqual(1,ex.AggregatedExceptions.Count,"should have one exception");
-                Assert.AreEqual("TestAssembly.BadDTO.ClassWithMissingPropertyJschema : Errors occured generating type meta.\r\nTestAssembly.BadDTO.ClassWithMissingPropertyJschema.AProperty : Method does not have <jschema> element. All DTO properties must have a jschema element\r\n", ex.ToString());
+                Assert.AreEqual("TestAssembly.BadDTO.ClassWithMissingPropertyJschema. : Errors occured generating type meta.\r\n\tTestAssembly.BadDTO.ClassWithMissingPropertyJschema.AProperty : Member does not have <jschema> element. All DTO properties must have a jschema element\r\n", ex.ToString());
 
 
             }
@@ -72,7 +72,19 @@ namespace MetadataGeneration.Core.Tests
         {
             var jsonSchema = GenerateJsonSchemaForTestAssemblyDTO();
 
-            Assert.That(jsonSchema["properties"]["ExcludedDto"], Is.Null, "ExcludedDto should not appear in jschema");
+            Assert.That(jsonSchema["properties"]["SampleDto"]["description"].ToString(), Is.EqualTo("This is a sample Dto"));
+            Assert.That(jsonSchema["properties"]["SampleDto"]["properties"]["SampleName"]["description"].ToString(), Is.EqualTo("The name of the Sample"));
+        }
+
+        [Test]
+        public void EnumDescriptionShouldHaveWritespaceTrimmedOff()
+        {
+            var jsonSchema = GenerateJsonSchemaForTestAssemblyDTO();
+
+            Assert.That(jsonSchema["properties"]["SampleEnum"]["description"].ToString(), Is.EqualTo("This is a sample enum"));
+            Assert.That(jsonSchema["properties"]["SampleEnum"]["options"][0]["description"].ToString(), Is.EqualTo("The first value in the enum"));
+            Assert.That(jsonSchema["properties"]["SampleEnum"]["options"][1]["description"].ToString(), Is.EqualTo("The second value in the enum"));
+            Assert.That(jsonSchema["properties"]["SampleEnum"]["options"][2]["description"].ToString(), Is.EqualTo("The third value in the enum"));
         }
 
         private JObject GenerateJsonSchemaForTestAssemblyDTO()
