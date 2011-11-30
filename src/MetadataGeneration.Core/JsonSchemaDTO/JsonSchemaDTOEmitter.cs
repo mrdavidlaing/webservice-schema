@@ -101,23 +101,14 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
                 var fieldNode = type.GetXmlDocFieldNode(fieldName);
                 if (fieldNode != null)
                 {
-                    // TODO: may have to do some re-encoding
-                    description = fieldNode.Value.Trim();
+                    description = TrimAllWhitespace(fieldNode.Value);
                 }
 
                 option["description"] = description;
                 optionsArray.Add(option);
             }
         }
-        private static void SetAttribute(JObject pobj, XElement jsNode, string attributeName)
-        {
-            var node = jsNode.Attribute(attributeName);
-            if (node != null)
-            {
-                var nodeValue = node.Value;
-                pobj[attributeName] = nodeValue;
-            }
-        }
+
         private static string MungeAttributeName(string name)
         {
             if (name == "minimum")
@@ -410,11 +401,16 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
             var summaryElement = propElement.Descendants("summary").FirstOrDefault();
             if (summaryElement != null)
             {
-                string summary = summaryElement.Value;
-                summary = summary.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\t", " ");
-                summary = Regex.Replace(summary, "\\s+", " ", RegexOptions.Singleline);
-                propBase["description"] = summary.Trim();
+                propBase["description"] = TrimAllWhitespace(summaryElement.Value);
             }
+        }
+
+        private static string TrimAllWhitespace(string summary)
+        {
+            summary = summary.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Replace("\t", " ");
+            summary = Regex.Replace(summary, "\\s+", " ", RegexOptions.Singleline);
+            summary = summary.Trim();
+            return summary;
         }
 
         /// <summary>

@@ -30,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\TestAssembly.DTO.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -44,8 +45,10 @@
   <ItemGroup>
     <Compile Include="ArrayTypes.cs" />
     <Compile Include="Class1.cs" />
+    <Compile Include="SampleDto.cs" />
     <Compile Include="ExcludedDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SampleEnum.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
