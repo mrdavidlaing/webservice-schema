@@ -201,7 +201,7 @@ namespace MetadataGeneration.Core.WcfSMD
                         SetIntAttribute(methodSmdElement, service, "cacheDuration");
                         SetStringAttribute(methodSmdElement, service, "throttleScope");
 
-                        var paramResult = AddParameters(type, method, methodElement, service, includeDemoValue);
+                        var paramResult = AddParameters(type, method, methodElement, service, includeDemoValue, schema);
                         if (paramResult.HasErrors)
                             result.AddMetadataGenerationErrors(paramResult.MetadataGenerationErrors);
                     }
@@ -214,8 +214,15 @@ namespace MetadataGeneration.Core.WcfSMD
             return result;
 
         }
-
-        private static MetadataValidationResult AddParameters(Type type, MethodInfo method, XElement methodElement, JObject service, bool includeDemoValue)
+        private static bool IsTypeIntrinsic(Type type)
+        {
+            if(type.FullName.StartsWith("System"))
+            {
+                return true;
+            }
+            return false;
+        }
+        private static MetadataValidationResult AddParameters(Type type, MethodInfo method, XElement methodElement, JObject service, bool includeDemoValue, JObject schema)
         {
             var result = new MetadataValidationResult();
             var parameters = new JArray();
@@ -230,6 +237,11 @@ namespace MetadataGeneration.Core.WcfSMD
                 {
                     string message = string.Format("param element not found for {0}.{1} - {2}", type.Name, method.Name, parameter.Name);
                     result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type, message, "Every service parameter must have an associated <param> tag in the XML comments. See https://github.com/cityindex/RESTful-Webservice-Schema/wiki/Howto-write-XML-comments-for-SMD"));
+                }
+                else if (!IsTypeIntrinsic(parameter.ParameterType) && schema["properties"][parameter.ParameterType.Name] == null)
+                {
+                    string message = string.Format("schema type not found for {0}.{1} - {2}", type.Name, method.Name, parameter.Name);
+                    result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type, message, "Every service parameter must be represented in the json-schema."));
                 }
                 else
                 {

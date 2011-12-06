@@ -137,24 +137,24 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
             var properties = new JObject();
             typeObj["properties"] = properties;
 
-            // TODO: should we render fields if they are jschema decorated?
-            // seems like some fields are getting scattered about in the DTO classes
-
             foreach (var propertyInfo in type.GetProperties())
             {
                 string memberName = propertyInfo.Name;
                 var pnode = type.GetXmlDocPropertyNode(memberName);
                 if (pnode != null)
                 {
-                    var pobj = new JObject();
-                    properties[memberName] = pobj;
                     var jschemaXml = JschemaXmlComment.CreateFromXml(pnode.XPathSelectElement("jschema"));
 
                     if (jschemaXml != null)
                     {
+                        bool isBaseMember = pnode.Attribute("name").Value != "P:" + type.FullName + "." + propertyInfo.Name;
 
-                        if (!jschemaXml.Exclude)
+                        if (!jschemaXml.Exclude && !isBaseMember)
                         {
+                            var pobj = new JObject();
+                            properties[memberName] = pobj;
+
+
                             RenderTypeMeta(pobj, propertyInfo.PropertyType);
 
                             foreach (var item in jschemaXml.Element.Attributes())

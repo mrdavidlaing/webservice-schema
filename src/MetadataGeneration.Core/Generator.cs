@@ -10,8 +10,7 @@ namespace MetadataGeneration.Core
         public MetadataGenerationResult GenerateJsonSchema(XmlDocSource xmlDocSource)
         {
             var results = new MetadataGenerationResult();
-            //Checks that DTOs all have valid XML comments
-            XmlDocUtils.EnsureXmlDocsAreValid(xmlDocSource);
+            
 
             //Checks that each DTO type can be documented
             // merge canemittype to emitter
@@ -24,7 +23,20 @@ namespace MetadataGeneration.Core
             }
             catch (MetadataValidationException e)
             {
-                results.MetadataGenerationErrors.Add(new MetadataGenerationError(MetadataType.JsonSchema, typeof(object), e));    
+                results.MetadataGenerationErrors.Add(new MetadataGenerationError(MetadataType.JsonSchema, typeof(object), e));
+            }
+
+            try
+            {
+
+                
+                //Checks that DTOs all have valid XML comments
+                XmlDocUtils.EnsureXmlDocsAreValid(xmlDocSource);
+            }
+            catch (MetadataValidationException ex)
+            {
+
+                results.MetadataGenerationErrors.Add(new MetadataGenerationError(MetadataType.SMD, typeof(object), new MetadataValidationException(typeof(object), "", ex.Message, "", ex)));
             }
 
             return results;
@@ -32,13 +44,24 @@ namespace MetadataGeneration.Core
 
         public MetadataGenerationResult GenerateSmd(XmlDocSource xmlDocSource, JObject jsonSchema)
         {
-            var result = new Emitter().EmitSmdJson(xmlDocSource, true, jsonSchema);
+            MetadataGenerationResult result = new Emitter().EmitSmdJson(xmlDocSource, true, jsonSchema);
+            try
+            {
+
+                //Checks that services all have valid XML comments
+                xmlDocSource.RouteAssembly.AssemblyXML.EnsureXmlDocsValid();
+            }
+            catch (MetadataValidationException ex)
+            {
+
+                result.MetadataGenerationErrors.Add(new MetadataGenerationError(MetadataType.SMD, typeof(object), new MetadataValidationException(typeof(object), "", ex.Message, "", ex)));
+            }
             return result;
         }
 
         public void AddStreamingSMD(JObject smd, string streamingJsonPatch)
         {
-            smd["services"]["streaming"] = (JObject) JsonConvert.DeserializeObject(streamingJsonPatch);
+            smd["services"]["streaming"] = (JObject)JsonConvert.DeserializeObject(streamingJsonPatch);
         }
     }
 }
