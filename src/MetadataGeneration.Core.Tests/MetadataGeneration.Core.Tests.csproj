@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyWithXmlDocsTests.cs" />
+    <Compile Include="ServiceWithDifferentEndpointsTests.cs" />
     <Compile Include="SMDEmitterTests.cs" />
     <None Include="AuditorTests.cs" />
     <Compile Include="TestBase.cs" />

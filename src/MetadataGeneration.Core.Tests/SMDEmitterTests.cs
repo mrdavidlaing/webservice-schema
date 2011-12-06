@@ -112,14 +112,5 @@ namespace MetadataGeneration.Core.Tests
             Assert.That(smdSchema.HasErrors, Is.True, "There should have been a generation error");
             Assert.That(smdSchema.MetadataGenerationErrors.ToList().FirstOrDefault(e => e.ErrorReason.Contains("PUT")), Is.Not.Null, "There should have been a generation error for the PUT method");
         }
-
-        private static XmlDocSource CreateXmlDocSourceForTestAssembly(List<RouteElement> routes)
-        {
-            var xmlDocSource = new XmlDocSource();
-            xmlDocSource.Dtos.Add(AssemblyWithXmlDocs.CreateFromName("TestAssembly.DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null", "."));
-            xmlDocSource.RouteAssembly = AssemblyWithXmlDocs.CreateFromName("TestAssembly.Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null", ".");
-            xmlDocSource.Routes = routes;
-            return xmlDocSource;
-        }
     }
 }
