@@ -130,7 +130,7 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
 
             if (type.BaseType != null && type.BaseType != typeof(object))
             {
-                typeObj["extends"] = "#/" + type.BaseType.Name;
+                typeObj["extends"] = "#." + type.BaseType.Name;
             }
 
 
