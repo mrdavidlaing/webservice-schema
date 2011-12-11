@@ -12,7 +12,7 @@ namespace MetadataGeneration.Core.WcfSMD
 {
     public class Emitter
     {
-        
+
 
         public MetadataGenerationResult EmitSmdJson(XmlDocSource xmlDocSource, bool includeDemoValue, JObject schema)
         {
@@ -31,11 +31,11 @@ namespace MetadataGeneration.Core.WcfSMD
             JObject rpcServices = new JObject();
             rpc["services"] = rpcServices;
 
-            var seenTypes = new List<Type>(); // just to keep track of types so we don't map twice
+
 
             foreach (RouteElement route in xmlDocSource.Routes)
             {
-                var serviceResult = BuildServiceMapping(xmlDocSource, route, seenTypes, rpcServices, includeDemoValue, schema);
+                var serviceResult = BuildServiceMapping(xmlDocSource, route, rpcServices, includeDemoValue, schema);
                 result.AddValidationResults(serviceResult);
             }
 
@@ -43,48 +43,62 @@ namespace MetadataGeneration.Core.WcfSMD
             return result;
         }
 
-        private MetadataValidationResult BuildServiceMapping(XmlDocSource xmlDocSource, RouteElement route, List<Type> seenTypes, JObject smdBase, bool includeDemoValue, JObject schema)
+        private MetadataValidationResult BuildServiceMapping(XmlDocSource xmlDocSource, RouteElement route, JObject smdBase, bool includeDemoValue, JObject schema)
         {
             var result = new MetadataValidationResult();
 
-            Type type = xmlDocSource.RouteAssembly.Assembly.GetType(route.Type.Substring(0, route.Type.IndexOf(",")));
-            if (seenTypes.Contains(type))
+
+            while (true)
             {
-                return result;
-            }
+                Type type = xmlDocSource.RouteAssembly.Assembly.GetType(route.Type.Substring(0, route.Type.IndexOf(",")));
 
-            seenTypes.Add(type);
+                var typeElement = type.GetXmlDocTypeNodeWithSMD();
 
-            var typeElement = type.GetXmlDocTypeNodeWithSMD();
+                if (typeElement == null)
+                {
+                    result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type,
+                        "could not find xml doc element for type",
+                        "decorate type with xml documentation"));
+                    break;
+                }
 
-            if (typeElement == null)
-            {
-                return result;
-            }
+                var methodTarget = route.Endpoint.Trim('/');
 
-            var methodTarget = route.Endpoint.Trim('/');
-
-            foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance))
-            {
+                var method = type.GetMethod(route.Method, BindingFlags.Public | BindingFlags.Instance);
+                if (method == null)
+                {
+                    result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type,
+    "could not reflect method on type:" + type.FullName + "." + route.Method,
+    "correct method attribute in web.config"));
+                    break;
+                }
                 var methodElement = type.GetXmlDocMemberNodeWithSMD(type.FullName + "." + method.Name);
                 if (methodElement == null)
                 {
-                    continue;
+                    result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type,
+                        "could not find xml doc element for method " + type.FullName + "." + method.Name,
+                        "decorate method with xml documentation"));
+
+                    break;
                 }
 
                 // get smd xml, if present
                 var methodSmdElement = methodElement.XPathSelectElement("smd");
                 if (methodSmdElement == null)
                 {
-                    result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type, "should not have gotten a method element without smd", "All services that have XML comments must have a <smd> tag.  See https://github.com/cityindex/RESTful-Webservice-Schema/wiki/Howto-write-XML-comments-for-SMD for details"));
-                    continue; //advance to next service method
+                    result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type,
+                                                                                  "should not have gotten a method element without smd",
+                                                                                  "All services that have XML comments must have a <smd> tag.  See https://github.com/cityindex/RESTful-Webservice-Schema/wiki/Howto-write-XML-comments-for-SMD for details"));
+                    break;
                 }
 
                 var smdXmlComment = SmdXmlComment.CreateFromXml(methodSmdElement);
 
                 //Don't document methods that are marked exclude
                 if (smdXmlComment.Exclude)
-                    continue; //advance to next service method
+                {
+                    break;
+                }
 
                 JObject service = null;
                 var opContract = ReflectionUtils.GetAttribute<OperationContractAttribute>(method);
@@ -127,10 +141,13 @@ namespace MetadataGeneration.Core.WcfSMD
                                     break;
                                 default:
                                     result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type,
-                                        string.Format("The {0} service has transport method of type {1} that is not supported", methodName, webInvoke.Method), "Service transports like DELETE or PUT are poorly supported by client http clients, so you advised to only use GET or POST"));
-                                    continue; //advance to next service method
+                                                                                                  string.Format(
+                                                                                                      "The {0} service has transport method of type {1} that is not supported",
+                                                                                                      methodName,
+                                                                                                      webInvoke.Method),
+                                                                                                  "Service transports like DELETE or PUT are poorly supported by client http clients, so you advised to only use GET or POST"));
+                                    break;
                             }
-
                         }
                     }
 
@@ -138,15 +155,17 @@ namespace MetadataGeneration.Core.WcfSMD
                     {
                         JsonSchemaUtilities.ApplyDescription(service, methodElement);
                         string methodTargetTrimEnd = methodTarget.TrimEnd('/');
-                        
+
                         service.Add("target", methodTargetTrimEnd);
 
                         if (!string.IsNullOrWhiteSpace(methodUriTemplate))
                         {
                             service.Add("uriTemplate", methodUriTemplate);
                         }
-                        service.Add("contentType", "application/json");// TODO: declare this in meta or get from WebGet/WebInvoke
-                        service.Add("responseContentType", "application/json");// TODO: declare this in meta or get from WebGet/WebInvoke
+                        service.Add("contentType", "application/json");
+                        // TODO: declare this in meta or get from WebGet/WebInvoke
+                        service.Add("responseContentType", "application/json");
+                        // TODO: declare this in meta or get from WebGet/WebInvoke
                         service.Add("transport", methodTransport);
 
                         try
@@ -155,8 +174,12 @@ namespace MetadataGeneration.Core.WcfSMD
                         }
                         catch (ArgumentException e)
                         {
-                            result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type, string.Format("A service with the method name {0} already exists", methodName), "Ensure that methods names are unique across services"));
-                            return result;
+                            result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type,
+                                                                                          string.Format(
+                                                                                              "A service with the method name {0} already exists",
+                                                                                              methodName),
+                                                                                          "Ensure that methods names are unique across services"));
+                            break;
                         }
 
                         // this is not accurate/valid SMD for GET but dojox.io.services is not, yet, a very good 
@@ -172,25 +195,31 @@ namespace MetadataGeneration.Core.WcfSMD
                                 string methodReturnTypeName = method.ReturnType.Name;
                                 if (schema["properties"][methodReturnTypeName] == null)
                                 {
-                                    result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type, "Schema missing referenced return type " + methodReturnTypeName + " for method " + method.Name, "All types used by services must be decorated with the <jschema> tag.  See https://github.com/cityindex/RESTful-Webservice-Schema/wiki/Howto-write-XML-comments-for-JSchema"));
+                                    result.AddMetadataGenerationError(new MetadataGenerationError(MetadataType.SMD, type,
+                                                                                                  "Schema missing referenced return type " +
+                                                                                                  methodReturnTypeName +
+                                                                                                  " for method " +
+                                                                                                  method.Name,
+                                                                                                  "All types used by services must be decorated with the <jschema> tag.  See https://github.com/cityindex/RESTful-Webservice-Schema/wiki/Howto-write-XML-comments-for-JSchema"));
                                 }
-                                returnType = new JObject(new JProperty("$ref", JsonSchemaUtilities.RootDelimiter + methodReturnTypeName));
+                                returnType =
+                                    new JObject(new JProperty("$ref",
+                                                              JsonSchemaUtilities.RootDelimiter + methodReturnTypeName));
                             }
                             else
                             {
                                 returnType = null;
                             }
-
-
                         }
                         else if (Type.GetTypeCode(method.ReturnType) == TypeCode.Empty)
                         {
                             returnType = null;
-
                         }
                         else
                         {
-                            returnType = new JObject(new JProperty("type",  method.ReturnType.GetSchemaType()["type"].Value<string>()));
+                            returnType =
+                                new JObject(new JProperty("type",
+                                                          method.ReturnType.GetSchemaType()["type"].Value<string>()));
                         }
                         if (returnType != null)
                         {
@@ -205,18 +234,20 @@ namespace MetadataGeneration.Core.WcfSMD
                         if (paramResult.HasErrors)
                             result.AddMetadataGenerationErrors(paramResult.MetadataGenerationErrors);
                     }
-
                 }
                 if (!result.HasErrors)
                     result.AddMetadataGenerationSuccess(new MetadataGenerationSuccess(MetadataType.SMD, type));
+
+                break;
             }
+            ;
 
             return result;
 
         }
         private static bool IsTypeIntrinsic(Type type)
         {
-            if(type.FullName.StartsWith("System"))
+            if (type.FullName.StartsWith("System"))
             {
                 return true;
             }
