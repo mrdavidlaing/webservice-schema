@@ -137,9 +137,13 @@ namespace MetadataGeneration.Core.WcfSMD
                     if (service != null)
                     {
                         JsonSchemaUtilities.ApplyDescription(service, methodElement);
-                        string methodTargetTrimEnd = methodTarget.TrimEnd('/');
+                        string endpoint = methodTarget.TrimEnd('/');
+                        if (!string.IsNullOrEmpty(smdXmlComment.Endpoint))
+                        {
+                            endpoint = smdXmlComment.Endpoint;
+                        }
                         
-                        service.Add("target", methodTargetTrimEnd);
+                        service.Add("target", endpoint);
 
                         if (!string.IsNullOrWhiteSpace(methodUriTemplate))
                         {
