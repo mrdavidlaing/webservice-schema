@@ -9,6 +9,7 @@ namespace MetadataGeneration.Core
     {
         public Assembly Assembly { get; set; }
         public XDocument AssemblyXML { get; set; }
+        public string Version { get; set; }
         private static string _extraAssemblySearchPath = "";
 
         public static AssemblyWithXmlDocs CreateFromName(string dtoAssemblyName, string extraAssemblySearchPath)
@@ -20,8 +21,9 @@ namespace MetadataGeneration.Core
                 var assemblyXml = LoadXml(assembly);
                 return new AssemblyWithXmlDocs
                            {
-                               Assembly = assembly, 
-                               AssemblyXML = assemblyXml
+                               Assembly = assembly,
+                               AssemblyXML = assemblyXml,
+                               Version = assembly.GetName().Version.ToString()
                            };
             }
             finally

@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace MetadataGeneration.Core.Tests
 {
     [TestFixture]
-    public class JsonSchemaDtoEmitterTests: TestBase 
+    public class JsonSchemaDtoEmitterTests : TestBase
     {
         [Test]
         public void APropertyWithPublicFieldShouldThrow()
@@ -32,7 +32,7 @@ namespace MetadataGeneration.Core.Tests
             }
             catch (MetadataValidationException ex)
             {
-                Assert.AreEqual(1,ex.AggregatedExceptions.Count,"should have one exception");
+                Assert.AreEqual(1, ex.AggregatedExceptions.Count, "should have one exception");
                 Assert.AreEqual("TestAssembly.BadDTO.ClassWithMissingPropertyJschema. : Errors occured generating type meta.\r\n\tTestAssembly.BadDTO.ClassWithMissingPropertyJschema.AProperty : Member does not have <jschema> element. All DTO properties must have a jschema element\r\n", ex.ToString());
 
 
@@ -41,10 +41,10 @@ namespace MetadataGeneration.Core.Tests
         [Test]
         public void TypesMissingDocsAndJschemaShouldThrow()
         {
-            
+
             try
             {
-                UtilityExtensions.GetSchemaTypes(typeof(TestAssembly.BadDTO.ClassWithNoDocs).Assembly);    
+                UtilityExtensions.GetSchemaTypes(typeof(TestAssembly.BadDTO.ClassWithNoDocs).Assembly);
             }
             catch (MetadataValidationException ex)
             {
@@ -52,8 +52,8 @@ namespace MetadataGeneration.Core.Tests
                 Assert.AreEqual("Types have no XML Documentation: TestAssembly.BadDTO.ClassWithNoDocs\nTypes have no jschema element. Use exclude='true' if necessary: TestAssembly.BadDTO.ClassWithNoJschema", ex.Message);
             }
 
-            
-            
+
+
         }
         [Test]
         public void AllArrayTypesShouldBeDescribedAsArray()
@@ -91,7 +91,7 @@ namespace MetadataGeneration.Core.Tests
         {
             var xmlDocSource = new XmlDocSource();
             xmlDocSource.Dtos.Add(AssemblyWithXmlDocs.CreateFromName("TestAssembly.DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null", @"TestData\valid"));
-
+            xmlDocSource.RouteAssembly = new AssemblyWithXmlDocs() { Version = "1.0.0.0" };
             return new JsonSchemaDtoEmitter().EmitDtoJson(xmlDocSource);
         }
     }

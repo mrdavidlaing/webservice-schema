@@ -12,7 +12,7 @@ namespace MetadataGeneration.Core.WcfSMD
 {
     public class Emitter
     {
-        
+
 
         public MetadataGenerationResult EmitSmdJson(XmlDocSource xmlDocSource, bool includeDemoValue, JObject schema)
         {
@@ -20,7 +20,7 @@ namespace MetadataGeneration.Core.WcfSMD
             JObject smd = new JObject
                               {
                                   {"SMDVersion","2.6"},
-                                  {"version","1"},
+                                  {"version",xmlDocSource.RouteAssembly.Version},
                                   {"description","CIAPI SMD"},
                                   {"services", new JObject()}
                               };
@@ -142,7 +142,7 @@ namespace MetadataGeneration.Core.WcfSMD
                         {
                             endpoint = smdXmlComment.Endpoint;
                         }
-                        
+
                         service.Add("target", endpoint);
 
                         if (!string.IsNullOrWhiteSpace(methodUriTemplate))
@@ -194,7 +194,7 @@ namespace MetadataGeneration.Core.WcfSMD
                         }
                         else
                         {
-                            returnType = new JObject(new JProperty("type",  method.ReturnType.GetSchemaType()["type"].Value<string>()));
+                            returnType = new JObject(new JProperty("type", method.ReturnType.GetSchemaType()["type"].Value<string>()));
                         }
                         if (returnType != null)
                         {
@@ -220,7 +220,7 @@ namespace MetadataGeneration.Core.WcfSMD
         }
         private static bool IsTypeIntrinsic(Type type)
         {
-            if(type.FullName.StartsWith("System"))
+            if (type.FullName.StartsWith("System"))
             {
                 return true;
             }

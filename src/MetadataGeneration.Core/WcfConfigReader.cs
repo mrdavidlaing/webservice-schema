@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -22,6 +23,7 @@ namespace MetadataGeneration.Core
 
             var routeNodes = profile.XPathSelectElement("routes").XPathSelectElements("add").ToList();
             xmlDocSource.Routes = new List<RouteElement>();
+            
             foreach (var item in routeNodes)
             {
                 var map = new RouteElement()
@@ -30,8 +32,11 @@ namespace MetadataGeneration.Core
                     Name = item.Attribute("name").Value,
                     Type = item.Attribute("type").Value
                 };
+ 
                 xmlDocSource.Routes.Add(map);
             }
+
+            
             xmlDocSource.RouteAssembly =
                  AssemblyWithXmlDocs.CreateFromName(xmlDocSource.Routes[0].Type.Substring(xmlDocSource.Routes[0].Type.IndexOf(",") + 1).Trim(), assemblySearchPath);
 

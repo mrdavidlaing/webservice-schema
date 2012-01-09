@@ -17,6 +17,8 @@ namespace MetadataGeneration.Core.JsonSchemaDTO
             var schemaObj = new JObject();
             var assemblies = xmlDocSource.Dtos.Select(a => a.Assembly).ToArray();
 
+
+            schemaObj["version"] = xmlDocSource.RouteAssembly.Version;
             var schemaProperties = new JObject();
             schemaObj["properties"] = schemaProperties;
 
