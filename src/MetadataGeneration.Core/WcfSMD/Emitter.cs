@@ -103,7 +103,7 @@ namespace MetadataGeneration.Core.WcfSMD
                     if (webGet != null)
                     {
                         service = new JObject();
-                        methodUriTemplate = FixUriTemplate(webGet.UriTemplate);
+                        methodUriTemplate = ResolveUriTemplate(smdXmlComment, webGet.UriTemplate);
                         methodTransport = "GET";
                         methodEnvelope = "URL";
                     }
@@ -113,7 +113,7 @@ namespace MetadataGeneration.Core.WcfSMD
                         if (webInvoke != null)
                         {
                             service = new JObject();
-                            methodUriTemplate = FixUriTemplate(webInvoke.UriTemplate);
+                            methodUriTemplate = ResolveUriTemplate(smdXmlComment, webInvoke.UriTemplate);
 
                             switch (webInvoke.Method.ToUpper())
                             {
@@ -137,13 +137,8 @@ namespace MetadataGeneration.Core.WcfSMD
                     if (service != null)
                     {
                         JsonSchemaUtilities.ApplyDescription(service, methodElement);
-                        string endpoint = methodTarget.TrimEnd('/');
-                        if (!string.IsNullOrEmpty(smdXmlComment.Endpoint))
-                        {
-                            endpoint = smdXmlComment.Endpoint;
-                        }
 
-                        service.Add("target", endpoint);
+                        service.Add("target", ResolveEndpoint(smdXmlComment, methodTarget));
 
                         if (!string.IsNullOrWhiteSpace(methodUriTemplate))
                         {
@@ -218,6 +213,7 @@ namespace MetadataGeneration.Core.WcfSMD
             return result;
 
         }
+
         private static bool IsTypeIntrinsic(Type type)
         {
             if (type.FullName.StartsWith("System"))
@@ -341,19 +337,6 @@ namespace MetadataGeneration.Core.WcfSMD
                 service.Add(attributeName, Convert.ToInt64(throttleScopeAttribute.Value));
             }
         }
-        private static string FixUriTemplate(string methodUriTemplate)
-        {
-            if (!string.IsNullOrWhiteSpace(methodUriTemplate))
-            {
-                methodUriTemplate = methodUriTemplate.Replace("/?", "?");
-
-                //if (methodUriTemplate == "/")
-                //{
-                //    methodUriTemplate = null;
-                //}
-            }
-            return methodUriTemplate;
-        }
 
         internal static void AddPropertyDescription(JObject propBase, XElement metaElement, XElement docElement)
         {
@@ -371,6 +354,35 @@ namespace MetadataGeneration.Core.WcfSMD
 
             propBase.Add("description", description.Trim());
             return true;
+        }
+
+        private static string ResolveEndpoint(SmdXmlComment smdXmlComment, string methodTarget)
+        {
+            string endpoint = methodTarget.TrimEnd('/');
+            if (!string.IsNullOrEmpty(smdXmlComment.Endpoint))
+            {
+                endpoint = smdXmlComment.Endpoint;
+            }
+            return endpoint;
+        }
+
+        private static string ResolveUriTemplate(SmdXmlComment smdXmlComment, string methodUriTemplate)
+        {
+            var uriTemplate = methodUriTemplate;
+
+            //UriTemplate on SmdXmlComment takes precedence
+            if (!string.IsNullOrEmpty(smdXmlComment.UriTemplate))
+            {
+                uriTemplate = smdXmlComment.UriTemplate;
+            }
+
+            //Drop trailing slash
+            if (!string.IsNullOrWhiteSpace(uriTemplate))
+            {
+                uriTemplate = uriTemplate.Replace("/?", "?");
+            }
+
+            return uriTemplate;
         }
     }
 }

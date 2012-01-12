@@ -35,6 +35,18 @@ namespace TestAssembly.Service
                 ResponseFormat = WebMessageFormat.Json,
                 RequestFormat = WebMessageFormat.Json)]
             SampleDto GetDetail();
+
+            ///<summary>
+            /// Service with overridden endpoint and uriTemplate
+            ///</summary>
+            ///<returns></returns>
+            ///<smd endpoint="/endpoint/from/smd" uriTemplate="/uriTemplate/{from}/smd" />
+            [OperationContract]
+            [WebInvoke(Method = "GET",
+                UriTemplate = "/uriTemplate/{from}/WebInvoke",
+                ResponseFormat = WebMessageFormat.Json,
+                RequestFormat = WebMessageFormat.Json)]
+            SampleDto GetOverriddenExample();
         }
 
 }
